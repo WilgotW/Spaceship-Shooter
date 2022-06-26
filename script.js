@@ -12,8 +12,8 @@ let bulletCoolDown = 0.2;
 
 
 let astroids = [];
-let players = [];
 let bullets = [];
+let players = [];
 let keys = [];
 
 let bulletInterval;
@@ -119,6 +119,7 @@ function update(){
 
     keyboardInputs();
     playerXPosTeleportEffect();
+    collisionDetection();
 
 }
 //every 0.01 seconds
@@ -236,5 +237,25 @@ document.addEventListener('keydown', function(event) {
 document.addEventListener('keyup', function(event){
     keys[event.keyCode] = false;
 });
+
+
+//Collision
+function collisionDetection(){
+    for (let i = 0; i < bullets.length; i++) {
+        for (let y = 0; y < astroids.length; y++) {
+            //x position collision detection
+            if(bullets[i].x + bullets[i].width >= astroids[y].x && bullets[i].x <= astroids[y].x + astroids[y].width) {
+                //y position collision detection
+                if(bullets[i].y + bullets[i].height >= astroids[y].y && bullets[i].y <= astroids[y].y + astroids[y].height){
+                    console.log("Collision!");
+                }
+                
+
+            }
+
+
+        }
+    }
+}
 
 
