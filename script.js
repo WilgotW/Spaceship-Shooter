@@ -4,8 +4,8 @@ const c = canvas.getContext('2d');
 canvas.width = 1024 * 1.25;
 canvas.height = 560 * 1.25;
 
-const boxesAmount = 20;
-const playersAmount = 2;
+const astroidAmount = 20;
+const playersAmount = 1;
 const playerMoveForce = 0.05;
 const playerMaxSpeed = 3;
 let bulletCoolDown = 0.2;
@@ -94,7 +94,7 @@ class Bullet {
 }
 
 function setup(){
-    setupBoxes();
+    setupAstroids();
     setupPlayer();
 }
 setup();
@@ -118,6 +118,7 @@ function update(){
     })
 
     keyboardInputs();
+    playerXPosTeleportEffect();
 
 }
 //every 0.01 seconds
@@ -150,8 +151,19 @@ function setupPlayer(){
     }
 }
 
-function setupBoxes(){
-    for (i = 0; i < boxesAmount; i ++){
+function playerXPosTeleportEffect(){
+    //Left effect
+    if(players[0].x < 0 - players[0].width){
+        players[0].x = canvas.width + players[0].width;
+    }
+    //right effect
+    if(players[0].x > canvas.width + players[0].width){
+        players[0].x = 0 - players[0].width;
+    }
+}
+
+function setupAstroids(){
+    for (i = 0; i < astroidAmount; i ++){
         let x = generateRandomNum(0, canvas.width);
         let y = generateRandomNum(0, 200);
         let width = generateRandomNum(50, 60);
