@@ -20,6 +20,7 @@ let astroidsSpawned = 0;
 
 let astroids = [];
 let bullets = [];
+let powerUps = [];
 let players = [];
 let keys = [];
 
@@ -137,6 +138,44 @@ class Bullet {
     }
 }
 
+class PowerUp{
+    constructor(x, y, width, height){
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.speed = 1;
+        this.health = 5;
+        this.defaultColor = 'yellow';
+        this.destroyed = false;
+    }
+    draw(){
+        if(!this.destroyed){
+            c.fillStyle = this.defaultColor;
+            c.fillRect(this.x, this.y, this.width, this.height);
+        }
+    }
+    move(){
+        if(!this.destroyed){
+            this.x -= this.speed;
+            
+        }
+        
+    }
+    takeDmg(){
+        this.health -= 1;
+        if(this.health <= 0){
+            this.destroy();
+        }
+    }
+    destroy(){
+        this.destroyed = true;
+        this.x = 100000;
+        this.width = 0;
+        this.height = 0;
+    }
+}
+
 function debug(){
     console.log(astroidsInScene);
 }
@@ -145,12 +184,18 @@ setInterval(debug, 500);
 function setup(){
     setupPlayer();
     newWave();
+    
+    
+    
+
 }
 setup();
-
+powerUps[0] = new PowerUp(canvas.width -100, 200, 50, 50);
 function update(){
     refrech();
     
+    powerUps[0].draw();
+    powerUps[0].move();
     
     astroids.forEach(box => {
         box.draw();
@@ -167,9 +212,15 @@ function update(){
         bullet.move();
     })
 
+    powerUps.forEach(powerUp => {
+        powerUp.draw();
+        powerUp.move();
+    })
+
     keyboardInputs();
     playerXPosTeleportEffect();
     collisionDetection(bullets, astroids);
+    collisionDetection(bullets, powerUps);
 
 }
 //every 0.01 seconds
@@ -345,6 +396,9 @@ function collisionDetection(array1, array2){
                     if(array2 == astroids){
                         //Astroid actions
                         astroids[y].destroy();
+                    }
+                    if(array2 == powerUps){
+                        powerUps[0].takeDmg();
                     }
                 }
             }
