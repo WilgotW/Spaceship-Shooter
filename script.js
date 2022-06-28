@@ -1,6 +1,6 @@
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext('2d');
-//hello
+
 canvas.width = 1024 * 1.4;
 canvas.height = 560 * 1.4;
 
@@ -9,9 +9,13 @@ const playersAmount = 1;
 const playerMoveForce = 0.05;
 const playerMaxSpeed = 3;
 let bulletCoolDown = 0.2;
-let spawnRepeatRate = 3000; //1 second
+let spawnRepeatRate = 3000; //3 seconds
+const beginingSpawnRate = 3000;
 let spawnAmount = 1;
+let speedBonus = 0;
+let currentWave = 0;
 
+let astroidsInScene = 0;
 let astroidsSpawned = 0;
 
 let astroids = [];
@@ -34,6 +38,8 @@ class Astroid {
         this.defaultColor = color;
         this.fallSpeed = downSpeed;
         this.destroyed = false;
+
+        astroidsInScene++;
     }
     draw(){
         if(!this.destroyed){
@@ -52,12 +58,18 @@ class Astroid {
             this.y += this.fallSpeed;
             this.x += Math.ceil(Math.random() * 1) * (Math.round(Math.random()) ? 1 : -1);
         }
+        if(this.y >= canvas.height + 300 && this.destroyed == false){
+            this.destroy();
+        }
     }
     destroy(){
+        console.log("destroyed");
         this.destroyed = true;
         this.x = 1000000;
         this.width = 0;
         this.height = 0;
+
+        astroidsInScene--;
     }
 }
 
@@ -125,15 +137,20 @@ class Bullet {
     }
 }
 
+function debug(){
+    console.log(astroidsInScene);
+}
+setInterval(debug, 500);
+
 function setup(){
-    setupAstroids();
     setupPlayer();
-    objectSpawner();
+    newWave();
 }
 setup();
 
 function update(){
     refrech();
+    
     
     astroids.forEach(box => {
         box.draw();
@@ -196,51 +213,58 @@ function playerXPosTeleportEffect(){
     }
 }
 
-function setupAstroids(){
-    
-    // for (i = 0; i < astroidAmount; i ++){
-    //     // let x = generateRandomNum(0, canvas.width);
-    //     // let y = generateRandomNum(0, 200);
-    //     // let width = generateRandomNum(50, 60);
-    //     // let height = generateRandomNum(50, 60);
-        
-    //     // //this uses hsl, only random greyscale
-    //     // let k = generateRandomNum(10, 80).toString() + "%";
-    //     // color = 'hsl(0, 0%, ' + k + ')'; 
-       
-    //     // astroids[i] = new Astroid(x, y, width, height, color);
-    // }
-}
+function objectSpawner(amountObjectsToSpawn){
 
-function objectSpawner(){
-    spawnObject(astroids, Astroid, spawnAmount);
+    if(astroidsSpawned < amountObjectsToSpawn){
+        spawnObject(astroids, Astroid, spawnAmount);
+    }
+    
     astroidsSpawned++;
+
     if(spawnRepeatRate > 1000){
         spawnRepeatRate -= 50;
     }
     if(astroidsSpawned == 20 || astroidsSpawned == 50){
         spawnAmount++;
-    }
-    console.log(spawnRepeatRate + " spawn rate");
-    console.log(astroidsSpawned + " astroids spawned");
-    setTimeout(objectSpawner, spawnRepeatRate);
+    } 
+    if (astroidsSpawned >= amountObjectsToSpawn && astroidsInScene == 0){
+        newWave();
+    }    
+    setTimeout(objectSpawner, spawnRepeatRate, amountObjectsToSpawn);
 }
 
+function newWave(){
+    currentWave++;
+    console.log("Wave " + currentWave + " Starting");
+    astroidsSpawned = 0;
+    spawnRepeatRate = beginingSpawnRate;
+    spawnAmount = 1;
+    setTimeout(objectSpawner, 3000, 70);
+    if(currentWave == 2){
+        speedBonus += 0.2;
+    }
+}
 
 function spawnObject(objectArray, objectClass, amount ){
     
     for(let i = 0; i < amount; i++){
         //random Values
-        let x = generateRandomNum(0, canvas.width -300);
-        let y = -100;
+        
         let width = generateRandomNum(50, 60);
         let height = generateRandomNum(50, 60);
+
+        let x = generateRandomNum(0, canvas.width -300);
+        let y = -height;
     
+        let speed = Math.random() + speedBonus;
+        if(speed < 0.1){
+            speed = 0.15;
+        }
         //this uses hsl, only random greyscale
         let k = generateRandomNum(10, 80).toString() + "%";
         color = 'hsl(0, 0%, ' + k + ')'; 
 
-        objectArray.push(new objectClass(x, y, width, height, color, Math.random()));
+        objectArray.push(new objectClass(x, y, width, height, color, speed));
     }
     
     
