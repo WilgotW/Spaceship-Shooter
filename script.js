@@ -6,8 +6,8 @@ canvas.height = 560 * 1.4;
 
 const astroidAmount = 20;
 const playersAmount = 1;
-const playerMoveForce = 0.05;
-const playerMaxSpeed = 3;
+let playerMoveForce = 0.05;
+let playerMaxSpeed = 3;
 let bulletCoolDown = 0.2;
 let spawnRepeatRate = 3000; //3 seconds
 const beginingSpawnRate = 3000;
@@ -59,7 +59,7 @@ class Astroid {
             this.y += this.fallSpeed;
             this.x += Math.ceil(Math.random() * 1) * (Math.round(Math.random()) ? 1 : -1);
         }
-        if(this.y >= canvas.height + 300 && this.destroyed == false){
+        if(this.y >= canvas.height + this.height && this.destroyed == false){
             this.destroy();
         }
     }
@@ -128,6 +128,9 @@ class Bullet {
     move(){
         if(!this.destroyed){
             this.y -= this.bulletSpeed;
+            if(this.y < -20){
+                this.destroy();
+            }
         }
     }
     destroy(){
@@ -144,7 +147,7 @@ class PowerUp{
         this.y = y;
         this.width = width;
         this.height = height;
-        this.speed = 1;
+        this.speed = 2;
         this.health = 5;
         this.defaultColor = 'yellow';
         this.destroyed = false;
@@ -158,44 +161,53 @@ class PowerUp{
     move(){
         if(!this.destroyed){
             this.x -= this.speed;
-            
         }
         
     }
     takeDmg(){
         this.health -= 1;
-        if(this.health <= 0){
+        if(this.health <= 0 && !this.destroyed){
             this.destroy();
         }
     }
     destroy(){
+        giveBoost();
         this.destroyed = true;
         this.x = 100000;
         this.width = 0;
         this.height = 0;
     }
+    
+}
+function giveBoost(){
+    switch (Math.floor(Math.random() * 2) + 1) {
+        case 1:
+            //shoot speed
+            bulletCoolDown = 0.05;
+            console.log("bullets");
+            break;
+        case 2:
+            //player speed
+            playerMoveForce = 0.2;
+            console.log("speed");
+            break;
+    }
 }
 
 function debug(){
-    console.log(astroidsInScene);
+    // console.log(astroidsInScene);
+    console.log(Math.floor(Math.random() * 2) + 1);
 }
 setInterval(debug, 500);
 
 function setup(){
     setupPlayer();
     newWave();
-    
-    
-    
-
 }
 setup();
-powerUps[0] = new PowerUp(canvas.width -100, 200, 50, 50);
+
 function update(){
     refrech();
-    
-    powerUps[0].draw();
-    powerUps[0].move();
     
     astroids.forEach(box => {
         box.draw();
@@ -229,6 +241,10 @@ setInterval(update, 10);
 function refrech(){
     c.fillStyle = 'black';
     c.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function spawnPowerUp(){
+    powerUps.push(new PowerUp(canvas.width +100, 200, 50, 50)); 
 }
 
 function setupPlayer(){
@@ -276,6 +292,7 @@ function objectSpawner(amountObjectsToSpawn){
         spawnRepeatRate -= 50;
     }
     if(astroidsSpawned == 20 || astroidsSpawned == 50){
+        spawnPowerUp();
         spawnAmount++;
     } 
     if (astroidsSpawned >= amountObjectsToSpawn && astroidsInScene == 0){
@@ -398,7 +415,7 @@ function collisionDetection(array1, array2){
                         astroids[y].destroy();
                     }
                     if(array2 == powerUps){
-                        powerUps[0].takeDmg();
+                        powerUps[y].takeDmg();
                     }
                 }
             }
