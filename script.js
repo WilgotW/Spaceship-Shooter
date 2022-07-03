@@ -1,8 +1,12 @@
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext('2d');
 
-canvas.width = 1024 * 1.4;
-canvas.height = 560 * 1.4;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener('resize', function(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
 
 const astroidAmount = 20;
 const playersAmount = 1;
@@ -29,7 +33,6 @@ let dashInterval;
 let timePassed = 0;
 let coolDownEnded = true;
 
-
 class Astroid {
     constructor(x, y, width, height, color, downSpeed){
         this.x = x;
@@ -47,7 +50,6 @@ class Astroid {
             c.fillStyle = this.defaultColor;
             c.fillRect(this.x, this.y, this.width, this.height);
         }
-        
     }
     move(){
         //Random Movement
@@ -73,7 +75,6 @@ class Astroid {
         astroidsInScene--;
     }
 }
-
 class Player {
     //Setup
     constructor(x, y, width, height, color){
@@ -87,8 +88,8 @@ class Player {
         this.breakForce = 0.02;
     }
     draw(){
-        c.fillStyle = this.defaultColor;
-        c.fillRect(this.x, this.y, this.width, this.height);
+        // c.fillStyle = this.defaultColor;
+        // c.fillRect(this.x, this.y, this.width, this.height);
     }
     calcPhysics(){
         //break x Velocity
@@ -140,7 +141,6 @@ class Bullet {
         this.height = 0;
     }
 }
-
 class PowerUp{
     constructor(x, y, width, height){
         this.x = x;
@@ -156,6 +156,7 @@ class PowerUp{
         if(!this.destroyed){
             c.fillStyle = this.defaultColor;
             c.fillRect(this.x, this.y, this.width, this.height);
+            
         }
     }
     move(){
@@ -206,8 +207,12 @@ function setup(){
 }
 setup();
 
+let spaceShipImage = document.getElementById('spaceShip');
+
 function update(){
     refrech();
+
+    
     
     astroids.forEach(box => {
         box.draw();
@@ -217,6 +222,7 @@ function update(){
     players.forEach(player => {
         player.draw();
         player.calcPhysics();
+        c.drawImage(spaceShipImage, player.x - player.width/2, player.y, 76, 76);
     });
 
     bullets.forEach(bullet => {
@@ -285,7 +291,7 @@ function objectSpawner(amountObjectsToSpawn){
     if(astroidsSpawned < amountObjectsToSpawn){
         spawnObject(astroids, Astroid, spawnAmount);
     }
-    
+
     astroidsSpawned++;
 
     if(spawnRepeatRate > 1000){
